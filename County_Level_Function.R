@@ -13,8 +13,21 @@ library(sf)
 library(tidycensus)
 
 # Loading Raw Data --------------------------------------------------------
-US_Data <- read_rds("data/US_Data.RDS") %>% 
-  filter(County!="Unknown")
+#Prereq data
+State_Names <- read_rds("data/State_Names.RDS")
+county_pop_clean <- read_rds("data/county_pop_clean.RDS")
+state_pop_clean <- read_rds("data/state_pop_clean.RDS")
+
+US_Data_Raw <- read_csv(url("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"))
+
+US_Data <- left_join(US_Data_Raw,State_Names, by=c("state"))
+US_Data <- left_join(US_Data,state_pop_clean,by="state")
+US_Data <- left_join(US_Data,county_pop_clean, by=c("state","county")) %>%
+  rename("County"=county,"State"=state, "Date"=date, "Cases"=cases,"Deaths"=deaths)
+US_Data <- US_Data %>% filter(State %in% State_Names$state | State=="District of Columbia")
+
+US_Data <- US_Data %>% 
+  filter(County!="Unknown") %>% mutate(County_Population=ifelse(County=="New York City",8399000,County_Population))
 
 # Getting Dates -----------------------------------------------------------
 latest_date <- last(US_Data$Date)
@@ -28,9 +41,10 @@ dates <- as_tibble(dates)
 
 
 # Making the Function Itself ----------------------------------------------
-county_graph <- function(state="Alabama",county="Autauga",measure="New Cases",rollmean=7){
+county_graph <- function(state="Alabama",county="Autauga",measure="New Cases Per 100k",rollmean=7){
   
-##Filtering the data  
+
+# Filtering the data ------------------------------------------------------
   Data <- US_Data %>% 
     filter(State==state,County==county)
  
@@ -42,8 +56,9 @@ county_graph <- function(state="Alabama",county="Autauga",measure="New Cases",ro
     return("Method must be one of the following: New Cases, New Cases Per 100k, New Deaths, New Deaths Per 100k")
   }
   
-#Translating the Measure
-  measure <- case_when(measure=="New Cases"~"New_Cases",
+
+ #Translating the Measure
+  measure_var <- case_when(measure=="New Cases"~"New_Cases",
                        measure=="New Cases Per 100k"~"New_Cases_Per_100k",
                        measure=="New Deaths"~"New_Deaths",
                        measure=="New Deaths Per 100k"~"New_Deaths_Per_100k")
@@ -117,10 +132,10 @@ county_graph <- function(state="Alabama",county="Autauga",measure="New Cases",ro
 
 
 # Plotting ----------------------------------------------------------------
-  ggplot(Data, aes_string(x="Date",y=measure)) +
-    geom_col(aes_string(text=paste("Label_",measure,sep=""),
+  ggplot(Data, aes_string(x="Date",y=measure_var)) +
+    geom_col(aes_string(text=paste("Label_",measure_var,sep=""),
                  fill=Up_or_Down_Measure,color=Data$Up_or_Down_Measure), alpha=.7) +
-    geom_line(aes_string(y=paste(measure,"_Avg",sep="")),lwd=1) +
+    geom_line(aes_string(y=paste(measure_var,"_Avg",sep="")),lwd=1) +
     scale_x_date(expand = c(0,0), breaks = pretty_breaks(n=3, min.n=3), 
                  guide = guide_axis(check.overlap = T)) +
     scale_y_continuous(expand = c(0,0),label = comma) +
@@ -131,7 +146,7 @@ county_graph <- function(state="Alabama",county="Autauga",measure="New Cases",ro
     labs(y=NULL,
          x=NULL,
          fill=NULL,
-         title=paste("The Rolling Average of New Cases is ", Up_or_Down_Label, 
+         title=paste("The Rolling Average of ", measure, " is " , Up_or_Down_Label, 
                      " in ", county, ", ", state, sep=""),
          subtitle = paste(rollmean,"day rolling average"),
          caption = "Plot: @jakepscott2020 | Data: New York Times") +
@@ -146,4 +161,5 @@ county_graph <- function(state="Alabama",county="Autauga",measure="New Cases",ro
           axis.text.y = element_text(size=rel(.8)),
           plot.title.position = "plot")
 }
-county_graph(rollmean = 10,measure = "New Deaths")
+county_graph(rollmean = 10,measure = "New Deaths Per 100k")
+

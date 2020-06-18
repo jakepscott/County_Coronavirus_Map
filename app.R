@@ -78,6 +78,8 @@ server <- function(input, output) {
   })
   
   output$plot <- renderPlotly({
+    req(input$county!="")
+    req(input$statename!="")
     ggplotly(county_graph(state = input$statename, county = input$county,
                  measure = input$measure, rollmean = input$RollingAverage),
              tooltip="text")
