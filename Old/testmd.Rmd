@@ -1,0 +1,20 @@
+---
+title: "Untitled"
+author: "Jake Scott"
+date: "June 17, 2020"
+output: html_document
+---
+```{r,warning=FALSE}
+county_graph(state = "New York",county = "Oneida",measure = "New Cases",rollmean = 14)
+
+ggplotly(county_graph(state = "New York",county = "Madison",measure = "New Cases",rollmean = 7),
+         tooltip = c("text"))
+```
+
+```{r}
+test <- ggplot(Data, aes_string(x="Date",y=measure))+
+    geom_line(aes_string(y=line),lwd=1)
+
+ggplotly(test)    
+```
+
