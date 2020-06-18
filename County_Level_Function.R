@@ -115,19 +115,19 @@ county_graph <- function(state="Alabama",county="Autauga",measure="New Cases Per
     mutate(Label_New_Cases=paste("There were ",round(New_Cases,0), " new cases reported in ",
                                  county, " county on ", as.character(month(Date, label = T,abbr = F)),
                                  " ", day(Date), ", ", year(Date), 
-                                 ".", " The rolling average was ", New_Cases_Avg,".",sep=""),
+                                 ".", " The rolling average was ", round(New_Cases_Avg,0),".",sep=""),
            Label_New_Cases_Per_100k=paste("There were ",round(New_Cases_Per_100k,0), " new cases per 100,000 residents reported in ",
                                           county, " county on ", as.character(month(Date, label = T,abbr = F)),
                                           " ", day(Date), ", ", year(Date), 
-                                          ".", " The rolling average was ", New_Cases_Per_100k_Avg, ".",sep=""),
+                                          ".", " The rolling average was ", round(New_Cases_Per_100k_Avg,0), ".",sep=""),
            Label_New_Deaths=paste("There were ", round(New_Deaths,0), " new deaths reported in ",
                                   county, " county on ", as.character(month(Date, label = T,abbr = F)),
                                   " ", day(Date), ", ", year(Date), 
-                                  ".", " The rolling average was ", New_Deaths_Avg, ".",sep=""),
+                                  ".", " The rolling average was ", round(New_Deaths_Avg,0), ".",sep=""),
            Label_New_Deaths_Per_100k=paste("There were ", round(New_Deaths_Per_100k,0), " new deaths per 100,000 residents reported in ",
                                            county, " county on ", as.character(month(Date, label = T,abbr = F)),
                                            " ", day(Date), ", ", year(Date), 
-                                           ".", " The rolling average was ", New_Deaths_Per_100k_Avg,sep=""))
+                                           ".", " The rolling average was ", round(New_Deaths_Per_100k_Avg,0),sep=""))
   
 
 

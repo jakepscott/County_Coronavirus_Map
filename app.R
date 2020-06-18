@@ -73,7 +73,7 @@ server <- function(input, output) {
 
   
   output$countySelection <- renderUI({
-    counties <- US_Data %>% filter(State==input$statename) %>% arrange(County)
+    counties <- US_Data %>% filter(State==input$statename & County!="Unknown") %>% arrange(County)
     selectInput("county", "County", choices = unique(counties$County))
   })
   
